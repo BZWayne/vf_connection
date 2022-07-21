@@ -1,20 +1,19 @@
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-import json
 
-def request(data):
-    url = 'http://0.0.0.0:8000/plant'
+# url = 'http://0.0.0.0:8000/'
+# url = 'http://127.0.0.1:8000/'
+# url = 'http://172.18.0.1:8000/file'
+url = 'http://20.226.35.115:8000/'
 
-    files = {'file': open(data, 'rb')}
-    response = requests.post(url, files=files, verify = False)
-    try:
-        json_data = json.loads(response.text)
-        return json_data
-    except:
-        return None
+##### send image client #######
+def sendImage(filename):
+    files = {'my_file': (filename, open(filename, 'rb'))}
+    response = requests.post(url, files = files)
+    message = response.json()
+    print(message)
+    # message = 'Successfully received answer from server'
+    # return message
 
 if __name__ == "__main__":
-    path = '/home/afoflinux/Desktop/vertical_farming/check/Frame.jpeg'
-    res = request(path)
-    print(res)
+    filename = '/home/afoflinux/Desktop/vertical_farming/check/Frame.jpeg'
+    sendImage(filename)

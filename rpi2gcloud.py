@@ -8,34 +8,27 @@ from datetime import datetime
 from gcloud import storage
 from oauth2client.service_account import ServiceAccountCredentials
 import os
+import requests
+from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.encoders import jsonable_encoder
 
 HOST = '0.0.0.0'
 PORT = 3220
 path = "/home/afoflinux/Desktop/vertical_farming/check"
 os.chdir(path)
 
-def google_cloud(filename):
-    credentials_dict = {
-        "type": "service_account",
-        "project_id": "verticalfarming-356807",
-        "private_key_id": "d216c049547a20e2bb4e1cfb6edc7a9a623dd591",
-        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDWXNUCjeY6yxZh\nPOkfcrX5tieYeA9/+zokej/5Q0Gg0skMGy/MhpDOk6PHhAJ0KVhr8NU7Lu8ftvud\nlvMe62W4wFTAClq5KdWf/UQnkQZ0pxeJ4ojVOuGOkndjkko9y3j2EuURZYKYsxAC\n6ipu5+iWEKCth3mktUqtIksCSICywvKmcFIDu7yZ1VT2lZO+QX1cFaO5V3Bov2ep\nOuk/CZDdm2aagpikzwgFB730dHAxxjxm/UR/Dy5j1xtiA0c/8FjFLkL43CoCq5c1\nuRM7xKmgGaVtP5kiH9gT5knhxtQ+mGrmdleuOsw810rZYXvUTienLPKpZdTCS1Fl\nmIeRw2YVAgMBAAECggEAB7dJt5DSA7XBtXhSz936LOXgoP1ZWXr6icuYt+ky2I4d\nzIDCBLOnTLhFwe2/hNzkIOaHVl0HIHYesnp3f9prS+4oXs1AnL+jv+GG7YGr4NEO\n6Nitojc/XTlqcLwYTgcf8IOXmTu1KrfvUJuLMXjJh3VLw1NIDqSz7m14k7l2YHjR\nAzd2sKPEVUpQCITbavEGegzhZaBHQfyyLnvPbRbUak0/wF64PVVGdwsYbhWhEKRt\nAJ3c7D0p3v7shCxduwDBFF7inO1bL/4gYQC5CdZ9bTSQAvgboEWTZZxZI+sZK+SQ\noo/krUe4H7CZyDvcwW8aA+RdnJ6dIVV4f8eNHH20VQKBgQD/wNUvsw7voz9EZwAt\nsMrbDEp0kH0+/REzFnS4IHlJWs/njhsLPSLCvhrLywiKZuOlvUWYpl9TCYVFTflQ\n06GdJLUnL+rhOzEz99v6OHBTEKorjyytzzJaOH4qRtQxDMLfJlpwbHLjHRyvsN22\nT2b3TJSrW13ssY8tO/MMhPxecwKBgQDWkcbE+ergmWfMwPjrOqsc0r0+u0gjES3q\nby4qE5NDX3Qhp1Ibj6lBApr2KFRw4uxk2PBCrc/bxQSDl5QepOcWOlvrFF4eM4fN\ny3jR+s64epnGiKe+rke1SnNvxeVjYrJvvQNaDYoeXPbkbXbAD5ucHZCgnmuON02T\nsdWRLvs/VwKBgHievK0DeS7iQkuDfJ0P/Yxz7oWtQ7S6bCs5ExFoF2vWTam65txV\nGBjayg6FkmCcCA+6BaHqDZk/K0C1drl9JoLTtjBmNBPH8/u7kV8g0TEL8gYbP4o1\n51yPukk8IIWFrD7Meuj87O5aY5YlB1wddMV7s75hmBmy4IEH/ihQbCorAoGAdLja\nWx7k0YdB+xVik3vXx5cwUWbJyCG5S5VtlIAPlQ/g+cmulcWhufaz24J25O3c0MNe\nd7dbol7bpMYZUk48U1At3oS26lD36FBuijOYrqwq6OA/+C+QXKOChmQt89Gl5bj5\nkMxavUevGvYdKj+TU+qVWXq0Yand7qFH33GiRYMCgYEA5tgnDH+PHV6Ldbavu8zu\n7O8L2i2OnAj5cizZoNwNAXwhHlC376Bl66SQye1ujc9h6zP3zuVimy/GtvxE6iU6\nSaqE5c/ILYKJownyOLKQ0X8xnkN5NojV5KjeptR47/BorcJMp4OclUgUU+f+bJcY\nIzhUCNsVfjBOZ4GZ4ynW9fw=\n-----END PRIVATE KEY-----\n",
-        "client_email": "verticalfarming-356807@appspot.gserviceaccount.com",
-        "client_id": "101084578763635294305",
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/verticalfarming-356807%40appspot.gserviceaccount.com"
-    }
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-        credentials_dict
-    )
-    client = storage.Client(credentials=credentials, project='VerticalFarming')
-    bucket = client.get_bucket('verticalfarming')
-    blob = bucket.blob('myfile')
-    blob.upload_from_filename(filename)
-    message = 'Done'
+app = FastAPI()
+url = 'http://0.0.0.0:8000/'
+
+##### send image client #######
+def sendImage(filename):
+    files = {'my_file': (filename, open(filename, 'rb'))}
+    response = requests.post(url, files = files)
+    message = response.json()
+    print(message)
+    # message = 'Successfully received answer from server'
     return message
+
 
 def appendcsv (filename, csvrow):
     with open(filename, 'a+', newline='') as write_obj:
@@ -98,9 +91,10 @@ if __name__ == '__main__':
                         time.sleep(0.1)
                 
                     try:
-                        #message = sendcloud(filename)
-                        message = google_cloud(filename)
+                        # message = sendcloud(filename)
+                        # message = google_cloud(filename)
                         # message = 'Image2Cloud'
+                        message = sendImage(filename)
                         print('Image sent to Cloud')
                         MESSAGE = message.encode('utf8')
                         conn.sendall(MESSAGE)
