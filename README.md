@@ -10,4 +10,5 @@ Initially, hardware components of Vertical Farming remained the same except the 
 
 ## Control
 The communication is going to be established through Raspberry Pi as a medium communicator. To take the visual data, Logitech web camera was connected to Raspberry Pi as part of Electrical Junction Box. The general architecture of Cloud based communication would be as following Figure. 
+
 ![comm_rasp](https://github.com/BZWayne/vf_connection/blob/main/comm_rasp.png)
